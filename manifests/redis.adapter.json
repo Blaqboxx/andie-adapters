@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "adapter_id": "redis",
+  "display_name": "Redis Adapter",
+  "version": "1.0.0",
+  "audited": true,
+  "execution": {
+    "dry_run_supported": true,
+    "rollback": {
+      "feasible": true,
+      "strategies": [
+        "restore_rdb_snapshot",
+        "restore_aof_archive"
+      ]
+    }
+  },
+  "capabilities": [
+    {
+      "id": "redis.info",
+      "operation": "collect server info",
+      "scope": "observe",
+      "risk_tier": "low",
+      "dangerous": false,
+      "production_default": "allow",
+      "requires_approval": false,
+      "audit_classification": "read"
+    },
+    {
+      "id": "redis.bgsave",
+      "operation": "trigger bgsave",
+      "scope": "configure",
+      "risk_tier": "moderate",
+      "dangerous": false,
+      "production_default": "supervised",
+      "requires_approval": true,
+      "audit_classification": "change"
+    },
+    {
+      "id": "redis.flushall",
+      "operation": "flush all keys",
+      "scope": "recover",
+      "risk_tier": "critical",
+      "dangerous": true,
+      "production_default": "deny",
+      "requires_approval": true,
+      "audit_classification": "destructive"
+    }
+  ],
+  "blast_radius": {
+    "scope": "service",
+    "reversible": false,
+    "max_affected_units": 1
+  },
+  "telemetry_requirements": [
+    {
+      "signal": "keyspace_db0_keys",
+      "source": "redis_info",
+      "required_for_verify": true,
+      "stabilization_window_seconds": 180
+    },
+    {
+      "signal": "redis_latency_ms",
+      "source": "redis_latency_monitor",
+      "required_for_verify": false,
+      "stabilization_window_seconds": 120
+    }
+  ],
+  "governance": {
+    "policy_profiles_supported": [
+      "dev",
+      "staging",
+      "prod"
+    ],
+    "least_privilege": true,
+    "deny_by_default_dangerous": true
+  }
+}

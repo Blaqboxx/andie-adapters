@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "adapter_id": "docker",
+  "display_name": "Docker Adapter",
+  "version": "1.0.0",
+  "audited": true,
+  "execution": {
+    "dry_run_supported": true,
+    "rollback": {
+      "feasible": true,
+      "strategies": [
+        "restart_previous_container",
+        "restore_previous_network_attach"
+      ]
+    }
+  },
+  "capabilities": [
+    {
+      "id": "docker.container.inspect",
+      "operation": "inspect container",
+      "scope": "observe",
+      "risk_tier": "low",
+      "dangerous": false,
+      "production_default": "allow",
+      "requires_approval": false,
+      "audit_classification": "read"
+    },
+    {
+      "id": "docker.container.restart",
+      "operation": "restart container",
+      "scope": "restart",
+      "risk_tier": "high",
+      "dangerous": true,
+      "production_default": "supervised",
+      "requires_approval": true,
+      "audit_classification": "sensitive_change"
+    },
+    {
+      "id": "docker.volume.prune",
+      "operation": "prune unused volumes",
+      "scope": "recover",
+      "risk_tier": "critical",
+      "dangerous": true,
+      "production_default": "deny",
+      "requires_approval": true,
+      "audit_classification": "destructive"
+    }
+  ],
+  "blast_radius": {
+    "scope": "host",
+    "reversible": true,
+    "max_affected_units": 3
+  },
+  "telemetry_requirements": [
+    {
+      "signal": "container_health_status",
+      "source": "docker_events",
+      "required_for_verify": true,
+      "stabilization_window_seconds": 300
+    },
+    {
+      "signal": "container_restart_count",
+      "source": "docker_inspect",
+      "required_for_verify": false,
+      "stabilization_window_seconds": 120
+    }
+  ],
+  "governance": {
+    "policy_profiles_supported": [
+      "dev",
+      "staging",
+      "prod"
+    ],
+    "least_privilege": true,
+    "deny_by_default_dangerous": true
+  }
+}

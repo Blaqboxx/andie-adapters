@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "adapter_id": "ssh",
+  "display_name": "SSH Adapter",
+  "version": "1.0.0",
+  "audited": true,
+  "execution": {
+    "dry_run_supported": true,
+    "rollback": {
+      "feasible": true,
+      "strategies": [
+        "revert_last_known_good_command",
+        "restore_previous_config_backup"
+      ]
+    }
+  },
+  "capabilities": [
+    {
+      "id": "ssh.command.readonly",
+      "operation": "run read-only remote command",
+      "scope": "diagnose",
+      "risk_tier": "low",
+      "dangerous": false,
+      "production_default": "allow",
+      "requires_approval": false,
+      "audit_classification": "read"
+    },
+    {
+      "id": "ssh.command.mutating",
+      "operation": "run mutating remote command",
+      "scope": "configure",
+      "risk_tier": "high",
+      "dangerous": true,
+      "production_default": "supervised",
+      "requires_approval": true,
+      "audit_classification": "sensitive_change"
+    }
+  ],
+  "blast_radius": {
+    "scope": "host",
+    "reversible": true,
+    "max_affected_units": 1
+  },
+  "telemetry_requirements": [
+    {
+      "signal": "remote_exit_code",
+      "source": "ssh_session",
+      "required_for_verify": true,
+      "stabilization_window_seconds": 30
+    },
+    {
+      "signal": "service_health_probe",
+      "source": "target_observability_agent",
+      "required_for_verify": true,
+      "stabilization_window_seconds": 180
+    }
+  ],
+  "governance": {
+    "policy_profiles_supported": [
+      "dev",
+      "staging",
+      "prod"
+    ],
+    "least_privilege": true,
+    "deny_by_default_dangerous": true
+  }
+}
